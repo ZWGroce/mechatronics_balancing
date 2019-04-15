@@ -1,0 +1,13 @@
+Utilize Accel stepper and onestep function (AFMS) to get both motors moving at the same time
+	For constant speed movement, use setSpeed() after calling moveTo()
+
+Place motor movements in a timer that will run faster than logic loop
+	Logic loop updates setpoints and distance to move
+	Timer moves stepper towards that position
+
+To-Do
+	Stepper test (using AFMS and AccelStepper)
+	Proper error calculation (What direction steppers need to be turning)
+	Correct gains for angle to steps needed
+	Run the thing (tweak as necessary)
+	
