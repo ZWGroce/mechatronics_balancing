@@ -5,9 +5,14 @@ Place motor movements in a timer that will run faster than logic loop
 	Logic loop updates setpoints and distance to move
 	Timer moves stepper towards that position
 
+Pitching Forward (Shield side down) = Negative Angle
+Pitching Backward (Shield side up) = Positive Angle
+Starting Angle = 27 degrees
+Straight Upright (Perfectly balanced) = 0
+
 To-Do
-	Stepper test (using AFMS and AccelStepper)
-	Proper error calculation (What direction steppers need to be turning)
+	+Stepper test (using AFMS and AccelStepper)
+	+Proper error calculation (What direction steppers need to be turning)
 	Correct gains for angle to steps needed
 	Run the thing (tweak as necessary)
 	

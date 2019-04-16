@@ -5,7 +5,7 @@
 #include <FOLPF.h>
 #include <Simple_PID.h>
 
-Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);
 Adafruit_StepperMotor *leftStepper = AFMS.getStepper(200,1);
 Adafruit_StepperMotor *rightStepper = AFMS.getStepper(200, 2);
 
@@ -14,7 +14,7 @@ Adafruit_StepperMotor *rightStepper = AFMS.getStepper(200, 2);
 //MPU-6050 Variables
 int ax, ay, az, gx, gy, gz;
 double axf, ayf, azf, axb, ayb, azb;
-double rollA, pitchA, rollG, pitchG, roll, pitch;
+double rollA, pitchA, rollG, pitchG, roll, pitch, rollAccelBias, pitchAccelBias;
 long gxb, gyb, gzb;
 double t, tlast, dt;
 double ts = 10;
@@ -27,9 +27,9 @@ double alpha = 0.1;
 FOLPF filter = FOLPF(alpha);
 
 //PID
-double kp = 0.1, ki = 0, kd = 0;
+double kp = 2.5, ki = 0.0, kd = 0.0;
 double du;
-double ubias = 0, duMax = 10;
+double ubias = 0.0, duMax = 100.0;
 double lastAngle;
 Simple_PID controller = Simple_PID(kp, ki, kd);
 
@@ -45,21 +45,27 @@ void setup() {
   for(int i = 0; i < calibration; i++){
     sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-    axb += ax;
-    ayb += ay;
-    azb += az;
+    axf = filter.getFilter(ax, axf);
+    ayf = filter.getFilter(ay, ayf);
+    azf = filter.getFilter(az, azf);
+
+    rollAccelBias += atan2(-ayf, azf) * 180 / M_PI;  //Eq.2 of lab manual page 137
+    pitchAccelBias += atan2(axf, sqrt((ayf * ayf) + (azf * azf))) * 180 / M_PI;  //Eq.1
+    
     gxb += gx;
     gyb += gy;
     gzb += gz;
     delay(5);
   }
 
-  axb /= calibration;  //Calculates gyro bias for the x, y, and z axis
-  ayb /= calibration;
-  azb /= calibration;
+  rollAccelBias /= calibration;
+  pitchAccelBias /= calibration;
+  
   gxb /= calibration;  //Calculates gyro bias for the x, y, and z axis
   gyb /= calibration;
   gzb /= calibration;
+
+  //Serial.print(gyb); Serial.print("\t"); Serial.println(pitchAccelBias);
 }
 
 //*****Main Program*****
@@ -69,16 +75,12 @@ void loop() {
   ayf = filter.getFilter(ay, ayf);
   azf = filter.getFilter(az, azf);
   
-  axf -= axb;
-  ayf -= ayb;
-  azf -= azb;
-  
-  rollA = (atan2(-ayf, azf) * 180 / M_PI);  //Eq.2 of lab manual page 137
-  pitchA = (atan2(axf, sqrt((ayf * ayf) + (azf * azf))) * 180 / M_PI);  //Eq.1
+  rollA = (atan2(-ayf, azf) * 180 / M_PI) - rollAccelBias;  //Eq.2 of lab manual page 137
+  pitchA = (atan2(axf, sqrt((ayf * ayf) + (azf * azf))) * 180 / M_PI) - pitchAccelBias;  //Eq.1
 
   t = millis();
   dt = t - tlast;
-
+  
   if(dt >= ts){
     sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
@@ -90,12 +92,13 @@ void loop() {
     pitchG += (gy / gyroScale) * (ts/1000);
 
     roll = (0.9996 * rollG) + (0.0004 * rollA);
-    pitch = (0.9996 * pitchG) + (0.0004 * pitchA);
+    pitch = ((0.9996 * pitchG) + (0.0004 * pitchA)) + 27;
 
-    //Serial.println(roll); Serial.print("\t"); Serial.println(pitch);
+    //Serial.print(roll); Serial.print("\t"); Serial.println(pitch);
     //Serial.print(rollA); Serial.print("\t"); Serial.println(pitchA); Serial.println();
 
-    du = controller.getDU(0, pitch, t, tlast, lastAngle);
+    du = controller.getDU(0.0, pitch, t, tlast, lastAngle);
+    //Serial.println(du);
     du = constrain(du, -duMax, duMax);
     lastAngle = pitch;
     
