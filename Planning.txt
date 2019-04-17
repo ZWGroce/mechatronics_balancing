@@ -10,9 +10,26 @@ Pitching Backward (Shield side up) = Positive Angle
 Starting Angle = 27 degrees
 Straight Upright (Perfectly balanced) = 0
 
+Error
+	Negative Error = Need to move backwards
+	Positive Error = Need to move forwards
+
+
+Motor Values
+
+	Forward		Backward
+
+Left	Positive	Negative
+
+Right	Negative	Positive
+
 To-Do
 	+Stepper test (using AFMS and AccelStepper)
 	+Proper error calculation (What direction steppers need to be turning)
 	Correct gains for angle to steps needed
 	Run the thing (tweak as necessary)
+
+Settings
+	Without Battery Pack	
+		kp = 10, duMax =  20, uMax = 100
 	
