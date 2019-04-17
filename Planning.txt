@@ -23,13 +23,15 @@ Left	Positive	Negative
 
 Right	Negative	Positive
 
+Changes
+	-Try different stepping modes (single, interleave, microstep) 
+	-Try quickstep addition to AFMS library (strips out microstep pwm stuff)
+	-Maybe not use AccelStepper?
+
 To-Do
 	+Stepper test (using AFMS and AccelStepper)
 	+Proper error calculation (What direction steppers need to be turning)
-	Correct gains for angle to steps needed
-	Run the thing (tweak as necessary)
-
-Settings
-	Without Battery Pack	
-		kp = 10, duMax =  20, uMax = 100
-	
+	+Correct gains for angle to steps needed
+	+Run the thing (tweak as necessary)
+	+Test with proposed changes (above)
+	(?)Get working with battery pack

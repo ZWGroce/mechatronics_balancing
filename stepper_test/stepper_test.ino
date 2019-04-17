@@ -9,19 +9,23 @@ Adafruit_StepperMotor *leftStep = AFMS.getStepper(200, 2);
 Adafruit_StepperMotor *rightStep = AFMS.getStepper(200, 1);
 
 void forwardStepLeft(){
-  leftStep->onestep(FORWARD, DOUBLE);  
+  leftStep->onestep(FORWARD, DOUBLE);
+  //leftStep->quickstep(FORWARD);  
 }
 
 void backwardStepLeft(){
-  leftStep->onestep(BACKWARD, DOUBLE);  
+  leftStep->onestep(BACKWARD, DOUBLE);
+  //leftStep->quickstep(BACKWARD);  
 }
 
 void forwardStepRight(){
-  rightStep->onestep(FORWARD, DOUBLE);  
+  rightStep->onestep(FORWARD, DOUBLE);
+  //rightStep->quickstep(FORWARD);  
 }
 
 void backwardStepRight(){
-  rightStep->onestep(BACKWARD, DOUBLE);  
+  rightStep->onestep(BACKWARD, DOUBLE);
+  //rightStep->quickstep(BACKWARD);  
 }
 
 AccelStepper leftStepper(forwardStepLeft, backwardStepLeft);
@@ -29,20 +33,21 @@ AccelStepper rightStepper(forwardStepRight, backwardStepRight);
 
 void setup() {
   AFMS.begin();
-  TWBR = 12;
+  //rightStep->quickstepInit();
+  //leftStep->quickstepInit();
+  //TWBR = ((F_CPU /400000l) - 16) / 2; // Change the i2c clock to 400KHz
+  //TWBR = 12;
   //Serial.begin(9600);
 
   leftStepper.setMaxSpeed(1000.0);
   //leftStepper.setAcceleration(1000.0);
   //leftStepper.moveTo(-50.0);
-  leftStepper.setSpeed(-100.0);
+  leftStepper.setSpeed(-200.0);
 
   rightStepper.setMaxSpeed(1000.0);
   //rightStepper.setAcceleration(1000.0);
   //rightStepper.moveTo(50.0);
-  rightStepper.setSpeed(100.0);
-
-  //TWBR = 12;  //Changes the i2c clock to 400KHz
+  rightStepper.setSpeed(200.0);
 }
 
 void loop() {
