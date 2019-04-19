@@ -35,3 +35,7 @@ To-Do
 	+Run the thing (tweak as necessary)
 	+Test with proposed changes (above)
 	(?)Get working with battery pack
+
+Settings
+	Without Battery
+	kp = 6 kd = 4

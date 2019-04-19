@@ -32,7 +32,8 @@ AccelStepper rightStepper(forwardStepRight, backwardStepRight);  //Create a righ
 //*****Define Variables*****
 int start = 0;  //Variable to track whether or not the motors should run
 double motorSpeed = 0.0;  //Tracks the speed the motors should be running at
-double balancePoint = 29.5;  //Angle the robot should be at to be perfectly balanced
+double balancePoint = 31.35;  //Angle the robot should be at to be perfectly balanced
+double deadBand = 3.0;  //Sets the minimum speed change necessary to register
 
 //MPU-6050 Variables
 int ax, ay, az, gx, gy, gz;  //Create variables to measure the acceleration and gyro in each direction
@@ -61,7 +62,7 @@ double alpha = 0.1;  //Set the filter variable value (lower value, more filtered
 FOLPF filter = FOLPF(alpha);  //Creates a filter object using the alpha value
 
 //PID
-double kp = 6.0, ki = 0.0, kd = 4.0;  //Initialize P, I, and D gains
+double kp = 12.0, ki = 0.0, kd = 5.0;  //Initialize P, I, and D gains
 double uleft, uright, du;  //Track the set speed of the left and right motors, and the change in speed (output by the controller)
 double duMax = 50.0, uMax = 150.0;  //Constrain the change in speed and the maximum top speed
 double lastAngle;  //Track the past pitch angle
@@ -139,6 +140,8 @@ void loop() {
       pitch = 0;  //Set the pitch equal to 0 if it is negative, this will only occur rarely at extremis for values that fall above the average bias
     }
 
+    //Serial.println(pitch);
+    
     if(pitch > (balancePoint - 0.5) && pitch < (balancePoint + 0.5)){  //Triggers if the pitch is within half a degree of the balancing point
       start = 1;  //Sets the start variable equal to 1 (ie robot should run if it is upright)
     }else if(pitch < 5.0 || pitch > 50.0){  //Triggers if the pitch is less than 5 or greater than 50 (ie tipped over)
@@ -150,7 +153,7 @@ void loop() {
     if(start == 1){  //Triggers the following controller code if the robot is upright
       du = controller.getDU(balancePoint, pitch, t, tlast, lastAngle);  //Utilize the Simple_PID library to calculate the du based on the gains and sensor readings
       du = constrain(du, -duMax, duMax);  //Prevents the du from getting too large
-      if(du < 3.0 && du > -3.0) du = 0;  //Creates a deadband to prevent excessive jitter when the error (and therefore du) is very small
+      if(du < deadBand && du > -deadBand) du = 0;  //Creates a deadband to prevent excessive jitter when the error (and therefore du) is very small
       lastAngle = pitch;  //Updates the last angle with the pitch
       motorSpeed += du;  //Changes the motor speed by du
       uleft = -motorSpeed;  //Sets uleft to the inverse of the current motor speed to get the right direction
@@ -165,8 +168,6 @@ void loop() {
     tlast = t;  //Updates the last time tracker
   }
   
-  if(start == 1){  //Triggers if the robot is upright and the motors should be running
-    leftStepper.runSpeed();  //Runs the left stepper motor at the current set speed
-    rightStepper.runSpeed();  //Rungs the right stepper motr at the current set speed
-  }
+  leftStepper.runSpeed();  //Runs the left stepper motor at the current set speed
+  rightStepper.runSpeed();  //Rungs the right stepper motr at the current set speed
 }
